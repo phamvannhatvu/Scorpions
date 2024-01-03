@@ -1,0 +1,20 @@
+*.exe
+.vscode
+*.7z
+VS2015-x64
+RubikSolver_STM32/.settings/*
+RubikSolver_STM32/.settings
+RubikSolver_STM32/Debug
+RubikSolver_STM32/Debug/*
+RubikSolver_STM32/Drivers
+RubikSolver_STM32/Drivers/*
+RubikSolver_STM32/Middlewares
+RubikSolver_STM32/Middlewares
+RubikSolver_STM32/Middlewares/*
+RubikSolver_STM32/.cproject
+RubikSolver_STM32/.mxproject
+RubikSolver_STM32/PWM Debug.launch
+RubikSolver_STM32/RubikScrambler Debug.launch
+RubikSolver_STM32/STM32F103C8TX_FLASH.ld
+.project
+
