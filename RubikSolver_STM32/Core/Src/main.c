@@ -28,7 +28,11 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+enum SystemState {
+	IDLE,
+	SETUP,
+	SOLVE
+} systemState = IDLE;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -50,6 +54,7 @@ TIM_HandleTypeDef htim2;
 uint8_t usb_buf[200];
 uint8_t usb_len = 0;
 uint8_t usb_received = 0;
+uint8_t color_loaded = 0;
 
 /* USER CODE END PV */
 
@@ -60,7 +65,7 @@ static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void servo_init();
-void color_setup();
+void rubik_solve();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -107,19 +112,35 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim2);
   servo_init();
   color_sensor_init();
-  color_setup();
 
   while (1)
   {
 //	  test_servo();
-	  if (usb_received == 1)
+	  switch (systemState)
 	  {
-			if (data_equal(usb_buf, 10, "read_color"))
-			{
-				enum color detected_color = read_color();
-				CDC_Transmit_FS((uint8_t*)&detected_color, 1);
-			}
-			usb_received = 0;
+	  case IDLE:
+		  if (usb_received == 1)
+		  {
+			  if (data_equal(usb_buf, 11, "color_setup"))
+			  {
+				  systemState = SETUP;
+				  usb_received = 0;
+			  }else if (data_equal(usb_buf, 11, "rubik_solve"))
+			  {
+				  systemState = SOLVE;
+				  usb_received = 0;
+			  }
+		  }
+		  break;
+	  case SETUP:
+		  color_setup();
+		  color_loaded = 1;
+		  systemState = IDLE;
+		  break;
+	  case SOLVE:
+		  rubik_solve();
+		  systemState = IDLE;
+		  break;
 	  }
     /* USER CODE END WHILE */
 
@@ -274,7 +295,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, BACK_END_Pin|BACK_HAND_Pin|BACK_GRIP_Pin|LEFT_ARM_Pin
+  HAL_GPIO_WritePin(GPIOA, BACK_ARM_Pin|BACK_HAND_Pin|BACK_GRIP_Pin|LEFT_ARM_Pin
                           |LEFT_HAND_Pin|LEFT_GRIP_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -288,9 +309,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : BACK_END_Pin BACK_HAND_Pin BACK_GRIP_Pin LEFT_ARM_Pin
+  /*Configure GPIO pins : BACK_ARM_Pin BACK_HAND_Pin BACK_GRIP_Pin LEFT_ARM_Pin
                            LEFT_HAND_Pin LEFT_GRIP_Pin */
-  GPIO_InitStruct.Pin = BACK_END_Pin|BACK_HAND_Pin|BACK_GRIP_Pin|LEFT_ARM_Pin
+  GPIO_InitStruct.Pin = BACK_ARM_Pin|BACK_HAND_Pin|BACK_GRIP_Pin|LEFT_ARM_Pin
                           |LEFT_HAND_Pin|LEFT_GRIP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -317,6 +338,46 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void load_color()
+{
+	// Read color from stored file
+	for (int i = 0; i < 6; ++i)
+	{
+		uint8_t ack = 1;
+		CDC_Transmit_FS(&ack, 1);
+		HAL_Delay(USB_SPACE_DELAY);
+		while (usb_received == 0 && usb_len != 3);
+		usb_received = 0;
+		set_color_range(i, usb_buf[0], usb_buf[1], usb_buf[2]);
+	}
+}
+
+void rubik_solve()
+{
+	uint8_t need_load = 1; // 1: need load, 0: not need load
+	if (color_loaded == 0)
+	{
+		CDC_Transmit_FS(&need_load, 1);
+		HAL_Delay(USB_SPACE_DELAY);
+		load_color();
+		color_loaded = 1;
+	}else
+	{
+		need_load = 0;
+		CDC_Transmit_FS(&need_load, 1);
+		HAL_Delay(USB_SPACE_DELAY);
+	}
+
+	for (int i = 0; i < 48; ++i)
+	{
+		while (usb_received == 0);
+		usb_received = 0;
+		enum color c = read_color();
+		CDC_Transmit_FS((uint8_t*)&c, 1);
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	}
+}
 
 void servo_init()
 {

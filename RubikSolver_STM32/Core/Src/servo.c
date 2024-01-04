@@ -98,16 +98,19 @@ void set_front_arm_dist(float dist)
 
 void test_servo()
 {
+	front_arm_rotate(0);
+	HAL_Delay(2000);
+	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	front_arm_rotate(90);
 	HAL_Delay(2000);
 	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	front_hand_rotate(90);
-	HAL_Delay(2000);
-	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	front_hand_rotate(0);
-	HAL_Delay(2000);
-	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	front_arm_rotate(0);
+//	front_hand_rotate(90);
+//	HAL_Delay(2000);
+//	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+//	front_hand_rotate(0);
+//	HAL_Delay(2000);
+//	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	front_arm_rotate(180);
 	HAL_Delay(2000);
 	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 }

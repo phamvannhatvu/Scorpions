@@ -25,17 +25,7 @@
 #define VALID_DIFF_STEP 15
 #define MAX_DIFF 255
 
-enum color{RED, WHITE, BLUE, GREEN, YELLOW, ORANGE, INVALID_COLOR};
-struct avg_color
-{
-	float red;
-	float green;
-	float blue;
-};
-
 void color_sensor_init();
-enum color read_color();
-void set_color_range(enum color c, float red, float green, float blue);
 void read_rgb(uint8_t *red, uint8_t *green, uint8_t *blue);
 
 #endif /* INC_COLOR_SENSOR_H_ */

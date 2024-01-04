@@ -59,8 +59,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LED_Pin GPIO_PIN_13
 #define LED_GPIO_Port GPIOC
-#define BACK_END_Pin GPIO_PIN_2
-#define BACK_END_GPIO_Port GPIOA
+#define BACK_ARM_Pin GPIO_PIN_2
+#define BACK_ARM_GPIO_Port GPIOA
 #define BACK_HAND_Pin GPIO_PIN_3
 #define BACK_HAND_GPIO_Port GPIOA
 #define BACK_GRIP_Pin GPIO_PIN_4

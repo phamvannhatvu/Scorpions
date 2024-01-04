@@ -6,7 +6,7 @@
  */
 
 #include "main.h"
-#include "color_sensor.h"
+#include "color_reading.h"
 #include "servo.h"
 #include "helper.h"
 
