@@ -443,5 +443,6 @@ int printMove(enum MOVE move) {
         default:
             return 1;
     }
+    fclose(outputPtr);
     return 0;
 }

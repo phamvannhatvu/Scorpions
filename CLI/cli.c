@@ -161,6 +161,9 @@ void rubik_solve()
         }
     }
 
+    // Empty the output file
+    FILE* outputPtr = fopen("output.txt", "w");
+    fclose(outputPtr);
     struct CUBE c;
     initCube(&c, STANDARD3X3);
     setCube(&c, STANDARD3X3, cube_color);
@@ -201,6 +204,25 @@ int main(int argc, char *argv[]) {
     }else
     {
         printf("auto\n");
+        // TODO
+        FILE* outputPtr = fopen("output.txt", "r");
+        char move[10];
+        while (fscanf(outputPtr, "%s", &move) != EOF)
+        {
+            write_usb((uint8_t*)move, (uint16_t)strlen(move));
+            Sleep(1);
+            printf("%s %d, waiting for the solver rotate the cube\n", move, (uint16_t)strlen(move));
+
+            uint8_t buf_in[10];
+            read_usb(buf_in, (uint16_t)strlen(move));
+            Sleep(1);
+            buf_in[strlen(move)] = '\0';
+            printf("Received: %s\n", buf_in);
+        }
+        // Done signal
+        char *done = "done";
+        write_usb((uint8_t*)done, 4);
+        fclose(outputPtr);
     }
 
     return 0;
