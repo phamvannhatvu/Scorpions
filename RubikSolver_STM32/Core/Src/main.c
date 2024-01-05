@@ -161,7 +161,20 @@ int main(void)
 		  }
 	  }else
 	  {
-		  test_servo();
+		  //TODO
+
+		  //Receiving solution
+		  while (usb_received == 0);
+		  usb_received = 0;
+		  HAL_Delay(USB_SPACE_DELAY);
+		  if (data_equal(usb_buf, usb_len, "done"))
+		  {
+			  continue;
+		  }
+		  turn(usb_buf, usb_len);
+
+		  CDC_Transmit_FS(usb_buf, usb_len);
+		  HAL_Delay(USB_SPACE_DELAY);
 	  }
     /* USER CODE END WHILE */
 
