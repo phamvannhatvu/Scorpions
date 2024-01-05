@@ -328,116 +328,117 @@ int moveCubes(struct CUBE* cube, int num, enum MOVE* moves) {
 }
 
 int printMove(enum MOVE move) {
+    FILE* outputPtr = fopen("output.txt", "a");
     switch (move) {
         case NOMOVE:
             break;
         case U:
-            printf("U ");
+            fprintf(outputPtr, "z R z' ");
             break;
         case UI:
-            printf("U' ");
+            fprintf(outputPtr, "z R' z' ");
             break;
         case U2:
-            printf("U2 ");
+            fprintf(outputPtr, "z R R z' ");
             break;
         case u:
-            printf("u ");
+            fprintf(outputPtr, "u ");
             break;
         case ui:
-            printf("u' ");
+            fprintf(outputPtr, "u' ");
             break;
         case u2:
-            printf("u2 ");
+            fprintf(outputPtr, "u2 ");
             break;
         case L:
-            printf("L ");
+            fprintf(outputPtr, "L ");
             break;
         case LI:
-            printf("L' ");
+            fprintf(outputPtr, "L' ");
             break;
         case L2:
-            printf("L2 ");
+            fprintf(outputPtr, "L L ");
             break;
         case l:
-            printf("l ");
+            fprintf(outputPtr, "l ");
             break;
         case li:
-            printf("l' ");
+            fprintf(outputPtr, "l' ");
             break;
         case l2:
-            printf("l2 ");
+            fprintf(outputPtr, "l2 ");
             break;
         case F:
-            printf("F ");
+            fprintf(outputPtr, "F ");
             break;
         case FI:
-            printf("F' ");
+            fprintf(outputPtr, "F' ");
             break;
         case F2:
-            printf("F2 ");
+            fprintf(outputPtr, "F F ");
             break;
         case f:
-            printf("f ");
+            fprintf(outputPtr, "f ");
             break;
         case fi:
-            printf("f' ");
+            fprintf(outputPtr, "f' ");
             break;
         case f2:
-            printf("f2 ");
+            fprintf(outputPtr, "f2 ");
             break;
         case R:
-            printf("R ");
+            fprintf(outputPtr, "R ");
             break;
         case RI:
-            printf("R' ");
+            fprintf(outputPtr, "R' ");
             break;
         case R2:
-            printf("R2 ");
+            fprintf(outputPtr, "R R ");
             break;
         case r:
-            printf("r ");
+            fprintf(outputPtr, "r ");
             break;
         case ri:
-            printf("r' ");
+            fprintf(outputPtr, "r' ");
             break;
         case r2:
-            printf("r2 ");
+            fprintf(outputPtr, "r2 ");
             break;
         case B:
-            printf("B ");
+            fprintf(outputPtr, "B ");
             break;
         case BI:
-            printf("B' ");
+            fprintf(outputPtr, "B' ");
             break;
         case B2:
-            printf("B2 ");
+            fprintf(outputPtr, "B B ");
             break;
         case b:
-            printf("b ");
+            fprintf(outputPtr, "b ");
             break;
         case bi:
-            printf("b' ");
+            fprintf(outputPtr, "b' ");
             break;
         case b2:
-            printf("b2 ");
+            fprintf(outputPtr, "b2 ");
             break;
         case D:
-            printf("D ");
+            fprintf(outputPtr, "z L z' ");
             break;
         case DI:
-            printf("D' ");
+            fprintf(outputPtr, "z L' z' ");
             break;
         case D2:
-            printf("D2 ");
+            fprintf(outputPtr, "z L L z' ");
             break;
         case d:
-            printf("d ");
+            fprintf(outputPtr, "d ");
             break;
         case di:
-            printf("d' ");
+            fprintf(outputPtr, "d' ");
             break;
         case d2:
-            printf("d2 ");
+            fprintf(outputPtr, "d2 ");
             break;
         default:
             return 1;
