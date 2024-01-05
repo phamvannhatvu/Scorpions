@@ -33,6 +33,11 @@ enum SystemState {
 	SETUP,
 	SOLVE
 } systemState = IDLE;
+
+enum SystemMode {
+	MANUAL,
+	AUTO
+} systemMode = MANUAL;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -113,35 +118,56 @@ int main(void)
   servo_init();
   color_sensor_init();
 
+  // Waiting user for select mode
+//  while (usb_received == 0);
+//  usb_received = 0;
+//  if (usb_buf[0] == 0)
+//  {
+//	  systemMode = MANUAL;
+//  }else
+//  {
+//	  systemMode = AUTO;
+//  }
+
   while (1)
   {
-//	  test_servo();
-	  switch (systemState)
-	  {
-	  case IDLE:
-		  if (usb_received == 1)
-		  {
-			  if (data_equal(usb_buf, 11, "color_setup"))
-			  {
-				  systemState = SETUP;
-				  usb_received = 0;
-			  }else if (data_equal(usb_buf, 11, "rubik_solve"))
-			  {
-				  systemState = SOLVE;
-				  usb_received = 0;
-			  }
-		  }
-		  break;
-	  case SETUP:
-		  color_setup();
-		  color_loaded = 1;
-		  systemState = IDLE;
-		  break;
-	  case SOLVE:
-		  rubik_solve();
-		  systemState = IDLE;
-		  break;
-	  }
+	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  HAL_Delay(100);
+	  test_servo();
+//	  continue;
+//	  if (systemMode == MANUAL)
+//	  {
+//		  switch (systemState)
+//		  {
+//		  case IDLE:
+//			  if (usb_received == 1)
+//			  {
+//				  if (data_equal(usb_buf, 11, "color_setup"))
+//				  {
+//					  systemState = SETUP;
+//					  usb_received = 0;
+//				  }else if (data_equal(usb_buf, 11, "rubik_solve"))
+//				  {
+//					  systemState = SOLVE;
+//					  usb_received = 0;
+//				  }
+//			  }
+//			  break;
+//		  case SETUP:
+//			  color_setup();
+//			  color_loaded = 1;
+//			  systemState = IDLE;
+//			  break;
+//		  case SOLVE:
+//			  rubik_solve();
+//			  systemState = IDLE;
+//			  break;
+//		  }
+//	  }else
+//	  {
+//		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+//		  HAL_Delay(100);
+//	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -381,19 +407,21 @@ void rubik_solve()
 
 void servo_init()
 {
-	init_servo(&right_arm_port, &right_arm_pin, RIGHT_ARM_GPIO_Port,
-			RIGHT_ARM_Pin, 30, right_arm_rotate);
-	init_servo(&right_hand_port, &right_hand_pin, RIGHT_HAND_GPIO_Port,
-			RIGHT_HAND_Pin, 60, right_hand_rotate);
-	init_servo(&right_grip_port, &right_grip_pin, RIGHT_GRIP_GPIO_Port,
-			RIGHT_GRIP_Pin, 90, right_grip_rotate);
+	init_servo(&arm_port[0], &arm_pin[0], RIGHT_ARM_GPIO_Port, RIGHT_ARM_Pin);
+	init_servo(&hand_port[0], &hand_pin[0], RIGHT_HAND_GPIO_Port, RIGHT_HAND_Pin);
+	init_servo(&grip_port[0], &grip_pin[0], RIGHT_GRIP_GPIO_Port, RIGHT_GRIP_Pin);
 
-	init_servo(&front_arm_port, &front_arm_pin, FRONT_ARM_GPIO_Port,
-			FRONT_ARM_Pin, 120, front_arm_rotate);
-	init_servo(&front_hand_port, &front_hand_pin, FRONT_HAND_GPIO_Port,
-			FRONT_HAND_Pin, 150, front_hand_rotate);
-	init_servo(&front_grip_port, &front_grip_pin, FRONT_GRIP_GPIO_Port,
-			FRONT_GRIP_Pin, 180, front_grip_rotate);
+	init_servo(&arm_port[1], &arm_pin[1], FRONT_ARM_GPIO_Port, FRONT_ARM_Pin);
+	init_servo(&hand_port[1], &hand_pin[1], FRONT_HAND_GPIO_Port, FRONT_HAND_Pin);
+	init_servo(&grip_port[1], &grip_pin[1], FRONT_GRIP_GPIO_Port, FRONT_GRIP_Pin);
+
+	init_servo(&arm_port[2], &arm_pin[2], LEFT_ARM_GPIO_Port, LEFT_ARM_Pin);
+	init_servo(&hand_port[2], &hand_pin[2], LEFT_HAND_GPIO_Port, LEFT_HAND_Pin);
+	init_servo(&grip_port[2], &grip_pin[2], LEFT_GRIP_GPIO_Port, LEFT_GRIP_Pin);
+
+	init_servo(&arm_port[3], &arm_pin[3], BACK_ARM_GPIO_Port, BACK_ARM_Pin);
+	init_servo(&hand_port[3], &hand_pin[3], BACK_HAND_GPIO_Port, BACK_HAND_Pin);
+	init_servo(&grip_port[3], &grip_pin[3], BACK_GRIP_GPIO_Port, BACK_GRIP_Pin);
 }
 
 /* USER CODE END 4 */

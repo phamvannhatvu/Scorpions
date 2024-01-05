@@ -18,8 +18,8 @@ const int color_read_order[] = {
 const char * color_by_id[] = {"red", "white", "orange", "yellow", "green", "blue"};
 
 enum SOLVING_MODE {
-    AUTO, 
-    MANUAL
+    MANUAL,
+    AUTO
 };
 
 enum OPTION {
@@ -182,27 +182,36 @@ void rubik_solve()
 
 int main(int argc, char *argv[]) {
     enum SOLVING_MODE mode = MANUAL;
+    printf("Enter %d to select manual mode or enter %d to select auto mode: \n", MANUAL, AUTO);
+    scanf("%d", &mode);
+    write_usb((uint8_t*)&mode, 1);
 
-    while (1)
+    if (mode == MANUAL)
     {
-        printf("Enter %d to setup, %d to solve or %d to exit: ", SETUP, SOLVE, EXIT);
-        enum OPTION option;
-        scanf("%d", &option);
-        printf("%d\n", option);
-        
-        switch (option)
+        while (1)
         {
-        case SETUP:
-            color_setup();
-            break;
-        
-        case SOLVE:
-            rubik_solve();
-            break;
+            printf("Enter %d to setup, %d to solve or %d to exit: ", SETUP, SOLVE, EXIT);
+            enum OPTION option;
+            scanf("%d", &option);
+            printf("%d\n", option);
+            
+            switch (option)
+            {
+            case SETUP:
+                color_setup();
+                break;
+            
+            case SOLVE:
+                rubik_solve();
+                break;
 
-        default:
-            return 0;
+            default:
+                return 0;
+            }
         }
+    }else
+    {
+        printf("auto\n");
     }
 
     return 0;
