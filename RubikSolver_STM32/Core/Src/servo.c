@@ -7,10 +7,10 @@
 #include "servo.h"
 #include "usbd_cdc_if.h"
 
-const int ARM_OFFSET[4] = {-5, 0, 0, 0};
-const int HAND_OFFSET[4] = {-8, 0, 0, 0};
-const int GRIP_OFFSET[4] = {2, 2, 0, 0};
-const int ARM_RATIO[4] = {1, 2, 1, 1};
+const int ARM_OFFSET[4] = {0, 0, 0, 0};
+const int HAND_OFFSET[4] = {0, 0, 0, 0};
+const int GRIP_OFFSET[4] = {0, 0, 0, 0};
+const int ARM_RATIO[4] = {1, 1, 1, 1};
 const int HAND_RATIO[4] = {1, 1.5, 1, 1};
 const int GRIP_RATIO[4] = {1, 1, 1, 1};
 
@@ -54,7 +54,7 @@ void arm_rotate(int index, float degree)
 
 void hand_rotate(int index, float degree)
 {
-	rotate(&arm_on_time[index], degree, HAND_OFFSET[index], HAND_RATIO[index]);
+	rotate(&hand_on_time[index], degree, HAND_OFFSET[index], HAND_RATIO[index]);
 }
 
 void grip_rotate(int index, float degree)
@@ -77,19 +77,40 @@ void set_arm_dist(int index, float dist)
 
 void test_servo()
 {
-	arm_rotate(1, 0);
+//	arm_rotate(1, 90);
+//	return;
+//	for (int i = 0; i < 4; ++i)
+//	{
+//		arm_rotate(i, 0);
+//		hand_rotate(i, 0);
+//		grip_rotate(i, 0);
+//	}
+	hand_rotate(1, 90);
 	HAL_Delay(1000);
-	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//	arm_rotate(1, 45);
-//	HAL_Delay(1000);
-//	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//	front_hand_rotate(90);
-//	HAL_Delay(2000);
-//	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//	front_hand_rotate(0);
-//	HAL_Delay(2000);
-//	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+	arm_rotate(1, 0);
+	HAL_Delay(5000);
+
+	hand_rotate(1, 0);
+	HAL_Delay(5000);
+
+//	for (int i = 0; i < 4; ++i)
+//	{
+//		arm_rotate(i, 90);
+//		hand_rotate(i, 90);
+//		grip_rotate(i, 90);
+//	}
+
 	arm_rotate(1, 90);
 	HAL_Delay(1000);
-	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+	hand_rotate(1, 0);
+	HAL_Delay(1000);
+//	for (int i = 0; i < 4; ++i)
+//	{
+//		arm_rotate(i, 180);
+//		hand_rotate(i, 180);
+//		grip_rotate(i, 180);
+//	}
+//	HAL_Delay(1000);
 }

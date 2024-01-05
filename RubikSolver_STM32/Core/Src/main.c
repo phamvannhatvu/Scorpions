@@ -119,55 +119,50 @@ int main(void)
   color_sensor_init();
 
   // Waiting user for select mode
-//  while (usb_received == 0);
-//  usb_received = 0;
-//  if (usb_buf[0] == 0)
-//  {
-//	  systemMode = MANUAL;
-//  }else
-//  {
-//	  systemMode = AUTO;
-//  }
+  while (usb_received == 0);
+  usb_received = 0;
+  if (usb_buf[0] == 0)
+  {
+	  systemMode = MANUAL;
+  }else
+  {
+	  systemMode = AUTO;
+  }
 
   while (1)
   {
-	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	  HAL_Delay(100);
-	  test_servo();
-//	  continue;
-//	  if (systemMode == MANUAL)
-//	  {
-//		  switch (systemState)
-//		  {
-//		  case IDLE:
-//			  if (usb_received == 1)
-//			  {
-//				  if (data_equal(usb_buf, 11, "color_setup"))
-//				  {
-//					  systemState = SETUP;
-//					  usb_received = 0;
-//				  }else if (data_equal(usb_buf, 11, "rubik_solve"))
-//				  {
-//					  systemState = SOLVE;
-//					  usb_received = 0;
-//				  }
-//			  }
-//			  break;
-//		  case SETUP:
-//			  color_setup();
-//			  color_loaded = 1;
-//			  systemState = IDLE;
-//			  break;
-//		  case SOLVE:
-//			  rubik_solve();
-//			  systemState = IDLE;
-//			  break;
-//		  }
-//	  }else
-//	  {
-//		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-//		  HAL_Delay(100);
-//	  }
+	  if (systemMode == MANUAL)
+	  {
+		  switch (systemState)
+		  {
+		  case IDLE:
+			  if (usb_received == 1)
+			  {
+				  if (data_equal(usb_buf, 11, "color_setup"))
+				  {
+					  systemState = SETUP;
+					  usb_received = 0;
+				  }else if (data_equal(usb_buf, 11, "rubik_solve"))
+				  {
+					  systemState = SOLVE;
+					  usb_received = 0;
+				  }
+			  }
+			  break;
+		  case SETUP:
+			  color_setup();
+			  color_loaded = 1;
+			  systemState = IDLE;
+			  break;
+		  case SOLVE:
+			  rubik_solve();
+			  systemState = IDLE;
+			  break;
+		  }
+	  }else
+	  {
+		  test_servo();
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -276,7 +271,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 5;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 149;
+  htim2.Init.Period = 1599;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -322,7 +317,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, BACK_ARM_Pin|BACK_HAND_Pin|BACK_GRIP_Pin|LEFT_ARM_Pin
-                          |LEFT_HAND_Pin|LEFT_GRIP_Pin, GPIO_PIN_RESET);
+                          |LEFT_HAND_Pin|LEFT_GRIP_Pin|RIGHT_GRIP_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, RIGHT_HAND_Pin|RIGHT_ARM_Pin|FRONT_GRIP_Pin|FRONT_HAND_Pin
@@ -336,19 +331,13 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : BACK_ARM_Pin BACK_HAND_Pin BACK_GRIP_Pin LEFT_ARM_Pin
-                           LEFT_HAND_Pin LEFT_GRIP_Pin */
+                           LEFT_HAND_Pin LEFT_GRIP_Pin RIGHT_GRIP_Pin */
   GPIO_InitStruct.Pin = BACK_ARM_Pin|BACK_HAND_Pin|BACK_GRIP_Pin|LEFT_ARM_Pin
-                          |LEFT_HAND_Pin|LEFT_GRIP_Pin;
+                          |LEFT_HAND_Pin|LEFT_GRIP_Pin|RIGHT_GRIP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : RIGHT_GRIP_Pin */
-  GPIO_InitStruct.Pin = RIGHT_GRIP_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(RIGHT_GRIP_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : RIGHT_HAND_Pin RIGHT_ARM_Pin FRONT_GRIP_Pin FRONT_HAND_Pin
                            FRONT_ARM_Pin */

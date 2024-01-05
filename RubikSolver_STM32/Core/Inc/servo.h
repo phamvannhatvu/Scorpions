@@ -12,9 +12,9 @@
 
 #define PI acos(-1)
 
-#define ZERO_DEGREE_ON_TIME 30
-#define FULL_DEGREE_ON_TIME 135
-#define SERVO_CYCLE 1000
+#define ZERO_DEGREE_ON_TIME 3
+#define FULL_DEGREE_ON_TIME 13.5
+#define SERVO_CYCLE 100
 
 #define GRIP_L1 30
 #define GRIP_L2 15

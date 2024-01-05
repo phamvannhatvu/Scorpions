@@ -71,7 +71,7 @@ void Error_Handler(void);
 #define LEFT_HAND_GPIO_Port GPIOA
 #define LEFT_GRIP_Pin GPIO_PIN_7
 #define LEFT_GRIP_GPIO_Port GPIOA
-#define RIGHT_GRIP_Pin GPIO_PIN_15
+#define RIGHT_GRIP_Pin GPIO_PIN_10
 #define RIGHT_GRIP_GPIO_Port GPIOA
 #define RIGHT_HAND_Pin GPIO_PIN_3
 #define RIGHT_HAND_GPIO_Port GPIOB

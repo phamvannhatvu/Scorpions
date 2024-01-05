@@ -45,15 +45,15 @@ void servos_pwm_timer_run()
 			arm_port[i], arm_pin[i], arm_on_time[i]);
 	}
 
-//	for (int i = 0; i < 4; ++i)
-//	{
-//		servo_timer_run(&hand_counter[i], &hand_status[i],
-//			hand_port[i], hand_pin[i], hand_on_time[i]);
-//	}
-//
-//	for (int i = 0; i < 4; ++i)
-//	{
-//		servo_timer_run(&hand_counter[i], &hand_status[i],
-//			hand_port[i], hand_pin[i], hand_on_time[i]);
-//	}
+	for (int i = 0; i < 4; ++i)
+	{
+		servo_timer_run(&hand_counter[i], &hand_status[i],
+			hand_port[i], hand_pin[i], hand_on_time[i]);
+	}
+
+	for (int i = 0; i < 4; ++i)
+	{
+		servo_timer_run(&grip_counter[i], &grip_status[i],
+			grip_port[i], grip_pin[i], grip_on_time[i]);
+	}
 }
