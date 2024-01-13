@@ -11,7 +11,7 @@
 #include "helper.h"
 #include "solver.h"
 
-extern I2C_HandleTypeDef hi2c1;
+extern I2C_HandleTypeDef hi2c2;
 extern uint8_t usb_buf[200];
 extern uint8_t usb_len;
 extern uint8_t usb_received;

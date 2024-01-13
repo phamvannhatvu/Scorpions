@@ -19,17 +19,17 @@
 
 void read_i2c_word(uint8_t reg_addr, uint8_t *data)
 {
-	HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, COMMAND_BIT | READ_WORD | reg_addr, I2C_MEMADD_SIZE_8BIT, data, 2, 1000);
+	HAL_I2C_Mem_Read(&hi2c2, SENSOR_ADDR, COMMAND_BIT | READ_WORD | reg_addr, I2C_MEMADD_SIZE_8BIT, data, 2, 1000);
 }
 
 void read_i2c_byte(uint8_t reg_addr, uint8_t *data)
 {
-	HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, COMMAND_BIT | reg_addr, I2C_MEMADD_SIZE_8BIT, data, 1, 1000);
+	HAL_I2C_Mem_Read(&hi2c2, SENSOR_ADDR, COMMAND_BIT | reg_addr, I2C_MEMADD_SIZE_8BIT, data, 1, 1000);
 }
 
 void write_i2c_byte(uint8_t reg_addr, uint8_t *data)
 {
-	HAL_I2C_Mem_Write(&hi2c1, SENSOR_ADDR, COMMAND_BIT | reg_addr, I2C_MEMADD_SIZE_8BIT, data, 1, 1000);
+	HAL_I2C_Mem_Write(&hi2c2, SENSOR_ADDR, COMMAND_BIT | reg_addr, I2C_MEMADD_SIZE_8BIT, data, 1, 1000);
 }
 
 void color_sensor_init()

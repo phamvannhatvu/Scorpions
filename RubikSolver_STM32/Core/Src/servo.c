@@ -7,30 +7,30 @@
 #include "servo.h"
 #include "usbd_cdc_if.h"
 
+// Index: RIGHT - FRONT - LEFT - BACK
 const int ARM_OFFSET[4] = {0, 0, 0, 0};
 const int HAND_OFFSET[4] = {0, 0, 0, 0};
-const int GRIP_OFFSET[4] = {0, 0, 0, 0};
+const int GRIP_OFFSET[4] = {17, 0, 20, 0};
 const int ARM_RATIO[4] = {1, 1, 1, 1};
-const int HAND_RATIO[4] = {1, 1.5, 1, 1};
+const int HAND_RATIO[4] = {1, 1, 1, 1};
 const int GRIP_RATIO[4] = {1, 1, 1, 1};
 
-int arm_on_time[4] = {ZERO_DEGREE_ON_TIME, ZERO_DEGREE_ON_TIME,
-		ZERO_DEGREE_ON_TIME, ZERO_DEGREE_ON_TIME};
-int hand_on_time[4] = {ZERO_DEGREE_ON_TIME, ZERO_DEGREE_ON_TIME,
-		ZERO_DEGREE_ON_TIME, ZERO_DEGREE_ON_TIME};
-int grip_on_time[4] = {ZERO_DEGREE_ON_TIME, ZERO_DEGREE_ON_TIME,
-		ZERO_DEGREE_ON_TIME, ZERO_DEGREE_ON_TIME};
-
-GPIO_TypeDef *arm_port[4], *hand_port[4], *grip_port[4];
-uint16_t arm_pin[4], hand_pin[4], grip_pin[4];
+TIM_HandleTypeDef arm_timer[4], hand_timer[4], grip_timer[4];
+uint32_t arm_channel[4], hand_channel[4], grip_channel[4];
 
 /* Private functions */
-void rotate(int *rotate_part_on_time, float degree, int8_t offset, float weight_ratio)
+void rotate(TIM_HandleTypeDef timer, uint32_t channel, float degree, int8_t offset, float weight_ratio)
 {
-	*rotate_part_on_time = ZERO_DEGREE_ON_TIME +
+	__HAL_TIM_SetCompare(&timer, channel, ZERO_DEGREE_ON_TIME +
 			(FULL_DEGREE_ON_TIME - ZERO_DEGREE_ON_TIME) *
-			(weight_ratio * degree + offset) / 180.0;
+			(weight_ratio * degree + offset) / 180.0);
 }
+
+void grip_rotate(int index, float degree)
+{
+	rotate(grip_timer[index], grip_channel[index], degree, GRIP_OFFSET[index], GRIP_RATIO[index]);
+}
+/* End of private functions */
 
 float rad_to_deg(float rad)
 {
@@ -39,78 +39,34 @@ float rad_to_deg(float rad)
 
 /* End of private functions */
 
-void init_servo(GPIO_TypeDef **servo_port, uint16_t *servo_pin,
-		GPIO_TypeDef *port, uint16_t pin)
+void init_servo(TIM_HandleTypeDef *servo_timer, uint32_t *servo_channel,
+		TIM_HandleTypeDef timer, uint32_t channel)
 {
-	*servo_port = port;
-	*servo_pin = pin;
-	HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
+	*servo_timer = timer;
+	*servo_channel = channel;
 }
 
 void arm_rotate(int index, float degree)
 {
-	rotate(&arm_on_time[index], degree, ARM_OFFSET[index], ARM_RATIO[index]);
+	rotate(arm_timer[index], arm_channel[index], degree, ARM_OFFSET[index], ARM_RATIO[index]);
 }
 
 void hand_rotate(int index, float degree)
 {
-	rotate(&hand_on_time[index], degree, HAND_OFFSET[index], HAND_RATIO[index]);
+	rotate(hand_timer[index], hand_channel[index], degree, HAND_OFFSET[index], HAND_RATIO[index]);
 }
 
-void grip_rotate(int index, float degree)
+void grip_hold(int index, float degree)
 {
-	rotate(&grip_on_time[index], degree, GRIP_OFFSET[index], GRIP_RATIO[index]);
+	grip_rotate(index, GRIP_HOLD_DEGREE);
 }
 
-void set_grip_dist(int index, float dist)
+void grip_release(int index, float degree)
 {
-	float half_dist = dist;
-	grip_rotate(index, acos((GRIP_L2*GRIP_L2 + half_dist*half_dist
-		- GRIP_L1*GRIP_L1) / (2.0*GRIP_L2*half_dist)));
-}
-
-void set_arm_dist(int index, float dist)
-{
-	float real_dist = ARM_LEN * 2 - (MAX_POS - ARM_POS + dist);
-	arm_rotate(index, rad_to_deg(acos(1 - real_dist / ARM_LEN)));
+	grip_rotate(index, GRIP_RELEASE_DEGREE);
 }
 
 void test_servo()
 {
-//	arm_rotate(1, 90);
-//	return;
-//	for (int i = 0; i < 4; ++i)
-//	{
-//		arm_rotate(i, 0);
-//		hand_rotate(i, 0);
-//		grip_rotate(i, 0);
-//	}
-	hand_rotate(1, 90);
-	HAL_Delay(1000);
 
-	arm_rotate(1, 0);
-	HAL_Delay(5000);
-
-	hand_rotate(1, 0);
-	HAL_Delay(5000);
-
-//	for (int i = 0; i < 4; ++i)
-//	{
-//		arm_rotate(i, 90);
-//		hand_rotate(i, 90);
-//		grip_rotate(i, 90);
-//	}
-
-	arm_rotate(1, 90);
-	HAL_Delay(1000);
-
-	hand_rotate(1, 0);
-	HAL_Delay(1000);
-//	for (int i = 0; i < 4; ++i)
-//	{
-//		arm_rotate(i, 180);
-//		hand_rotate(i, 180);
-//		grip_rotate(i, 180);
-//	}
-//	HAL_Delay(1000);
 }
