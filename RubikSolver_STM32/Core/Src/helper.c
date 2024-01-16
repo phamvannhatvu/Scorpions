@@ -18,4 +18,18 @@ int data_equal(uint8_t *data, uint8_t len, char *literal)
 	return 1;
 }
 
+uint8_t is_close(float a, float b)
+{
+	if ((a > b && a - b < EPSILON) || (a < b && b - a < EPSILON) || a == b)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+float rad_to_deg(float rad)
+{
+	return rad * 180 / PI;
+}
+
 

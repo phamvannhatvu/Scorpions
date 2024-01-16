@@ -7,16 +7,14 @@
 #ifndef INC_SERVO_H_
 #define INC_SERVO_H_
 
-#include "math.h"
-#include "main.h"
-
-#define PI acos(-1)
+#include "global.h"
 
 #define ZERO_DEGREE_ON_TIME 250
 #define FULL_DEGREE_ON_TIME 1250
 
 #define GRIP_HOLD_DEGREE 3
 #define GRIP_RELEASE_DEGREE 90
+#define GRIP_PIECE_LEN 30
 
 const extern int ARM_OFFSET[4];
 const extern int HAND_OFFSET[4];

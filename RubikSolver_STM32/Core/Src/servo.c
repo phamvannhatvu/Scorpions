@@ -21,6 +21,7 @@ uint32_t arm_channel[4], hand_channel[4], grip_channel[4];
 /* Private functions */
 void rotate(TIM_HandleTypeDef timer, uint32_t channel, float degree, int8_t offset, float weight_ratio)
 {
+	if (degree > 180 || degree < 0) return;
 	__HAL_TIM_SetCompare(&timer, channel, ZERO_DEGREE_ON_TIME +
 			(FULL_DEGREE_ON_TIME - ZERO_DEGREE_ON_TIME) *
 			(weight_ratio * degree + offset) / 180.0);
@@ -29,12 +30,6 @@ void rotate(TIM_HandleTypeDef timer, uint32_t channel, float degree, int8_t offs
 void grip_rotate(int index, float degree)
 {
 	rotate(grip_timer[index], grip_channel[index], degree, GRIP_OFFSET[index], GRIP_RATIO[index]);
-}
-/* End of private functions */
-
-float rad_to_deg(float rad)
-{
-	return rad * 180 / PI;
 }
 
 /* End of private functions */
@@ -64,6 +59,22 @@ void grip_hold(int index, float degree)
 void grip_release(int index, float degree)
 {
 	grip_rotate(index, GRIP_RELEASE_DEGREE);
+}
+
+void set_grip_dist(int index, float distance)
+{
+    distance -= 3; // thickness of the grip is 3
+	// sin(deg) = (distance ^ 2 - 3 * GRIP_PIECE_LEN ^ 2) / (2 * distance * GRIP_PIECE_LEN)
+	float sine_of_deg = (distance * distance - 3 * GRIP_PIECE_LEN * GRIP_PIECE_LEN)
+			/ (2 * distance * GRIP_PIECE_LEN); 
+	if (sine_of_deg >= -1 && sine_of_deg <= 1)
+	{
+		float degree = asinf(sine_of_deg) * 180.0 / PI;
+		if (is_close(degree, 90) || is_close(degree, 0) || degree > 90|| degree < 0)
+		{
+			return;
+		}
+	}
 }
 
 void test_servo()
