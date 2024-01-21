@@ -9,31 +9,27 @@
 
 #include "global.h"
 
-#define ZERO_DEGREE_ON_TIME 250
-#define FULL_DEGREE_ON_TIME 1250
+#define SERVO_NUMBER 12
+#define SERVO_UNDEFINED SERVO_NUMBER
 
-#define GRIP_HOLD_DEGREE 3
-#define GRIP_RELEASE_DEGREE 90
-#define GRIP_PIECE_LEN 30
+#define SERVO_PERIOD 20000				// in microseconds
+#define SERVO_MINIMUM 500				// in microseconds
+#define SERVO_MAXIMUM 2500				// in microseconds
+#define SERVO_OFFSET 13.5				// in degrees
 
-const extern int ARM_OFFSET[4];
-const extern int HAND_OFFSET[4];
-const extern int GRIP_OFFSET[4];
-const extern int ARM_RATIO[4];
-const extern int HAND_RATIO[4];
-const extern int GRIP_RATIO[4];
+typedef struct {
+	TIM_HandleTypeDef *timer;
+	uint32_t channel;
+	float offset;
+	float target;
+} servo;
 
-extern TIM_HandleTypeDef arm_timer[4], hand_timer[4], grip_timer[4];
-extern uint32_t arm_channel[4], hand_channel[4], grip_channel[4];
+extern servo servos[SERVO_NUMBER];
 
-void arm_rotate(int index, float degree);
-void hand_rotate(int index, float degree);
-void grip_rotate(int index, float degree);
-void set_grip_dist(int index, float dist);
-void set_arm_dist(int index, float dist);
+void servoInit(void);
+uint8_t servoStart(TIM_HandleTypeDef *timer, uint32_t channel, float offset);
 
-void init_servo(TIM_HandleTypeDef *servo_timer, uint32_t *servo_channel,
-		TIM_HandleTypeDef timer, uint32_t channel);
-void test_servo();
+void servoRun();
+void servoRotate(servo *servoPointer);
 
 #endif /* INC_SERVO_H_ */

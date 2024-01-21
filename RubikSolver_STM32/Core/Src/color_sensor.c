@@ -15,39 +15,38 @@
 
 
 #include "color_sensor.h"
-#include "usbd_cdc_if.h"
 
-void read_i2c_word(uint8_t reg_addr, uint8_t *data)
+void readI2CWord(uint8_t reg_addr, uint8_t *data)
 {
 	HAL_I2C_Mem_Read(&hi2c2, SENSOR_ADDR, COMMAND_BIT | READ_WORD | reg_addr, I2C_MEMADD_SIZE_8BIT, data, 2, 1000);
 }
 
-void read_i2c_byte(uint8_t reg_addr, uint8_t *data)
+void readI2CByte(uint8_t reg_addr, uint8_t *data)
 {
 	HAL_I2C_Mem_Read(&hi2c2, SENSOR_ADDR, COMMAND_BIT | reg_addr, I2C_MEMADD_SIZE_8BIT, data, 1, 1000);
 }
 
-void write_i2c_byte(uint8_t reg_addr, uint8_t *data)
+void writeI2CByte(uint8_t reg_addr, uint8_t *data)
 {
 	HAL_I2C_Mem_Write(&hi2c2, SENSOR_ADDR, COMMAND_BIT | reg_addr, I2C_MEMADD_SIZE_8BIT, data, 1, 1000);
 }
 
-void color_sensor_init()
+void colorSensorInit()
 {
 	uint8_t en[1] = {0xB};
-	write_i2c_byte(EN_ADDR, en);
+	writeI2CByte(EN_ADDR, en);
 	HAL_Delay(3);
 }
 
-void read_rgb(uint8_t *red, uint8_t *green, uint8_t *blue)
+void readRGB(uint8_t *red, uint8_t *green, uint8_t *blue)
 {
 	uint8_t reds[2] = {0x00, 0x00};
 	uint8_t greens[2] = {0x00, 0x00};
 	uint8_t blues[2] = {0x00, 0x00};
 
-	read_i2c_word(RDATAL, reds);
-	read_i2c_word(GDATAL, greens);
-	read_i2c_word(BDATAL, blues);
+	readI2CWord(RDATAL, reds);
+	readI2CWord(GDATAL, greens);
+	readI2CWord(BDATAL, blues);
 	HAL_Delay(3);
 
 	uint16_t red16 = ((reds[1] << 8) + reds[0]);

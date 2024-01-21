@@ -10,6 +10,7 @@
 
 #include "global.h"
 #include "color_sensor.h"
+#include "usbd_cdc_if.h"
 
 #define USB_SPACE_DELAY 1000 //delay between consecutive usb transmit and receive
 
@@ -21,8 +22,7 @@ struct avg_color
 	float blue;
 };
 
-void color_setup();
-enum color read_color();
-void set_color_range(enum color c, float red, float green, float blue);
+enum color readColor();
+void setColorRange(enum color c, float red, float green, float blue);
 
 #endif /* INC_COLOR_READING_H_ */

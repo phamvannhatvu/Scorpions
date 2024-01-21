@@ -5,13 +5,17 @@
  *      Author: ADMIN
  */
 
+#ifndef GLOBAL_H_
+#define GLOBAL_H_
+
 #include "main.h"
-#include "color_reading.h"
-#include "servo.h"
-#include "helper.h"
-#include "solver.h"
 
 extern I2C_HandleTypeDef hi2c2;
 extern uint8_t usb_buf[200];
 extern uint8_t usb_len;
 extern uint8_t usb_received;
+
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim4;
+#endif

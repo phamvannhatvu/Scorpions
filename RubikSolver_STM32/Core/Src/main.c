@@ -24,6 +24,11 @@
 /* USER CODE BEGIN Includes */
 #include "global.h"
 #include "usbd_cdc_if.h"
+#include "color_reading.h"
+#include "helper.h"
+#include "servo.h"
+#include "solver.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -35,8 +40,8 @@ enum SystemState {
 } systemState = IDLE;
 
 enum SystemMode {
-	MANUAL,
-	AUTO
+	AUTO,
+	MANUAL
 } systemMode = MANUAL;
 /* USER CODE END PTD */
 
@@ -61,7 +66,6 @@ TIM_HandleTypeDef htim4;
 uint8_t usb_buf[200];
 uint8_t usb_len = 0;
 uint8_t usb_received = 0;
-uint8_t color_loaded = 0;
 
 /* USER CODE END PV */
 
@@ -73,9 +77,7 @@ static void MX_I2C2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 /* USER CODE BEGIN PFP */
-void init_servos();
-void rubik_solve();
-void init_pwms();
+void pwmsInit();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -121,25 +123,26 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  init_pwms();
-  init_servos();
-  color_sensor_init();
+  pwmsInit();
+  robotInit();
+  colorSensorInit();
 
   // Waiting user for select mode
-//  while (usb_received == 0);
-//  usb_received = 0;
-//  if (usb_buf[0] == 0)
-//  {
-//	  systemMode = MANUAL;
-//  }else
-//  {
-//	  systemMode = AUTO;
-//  }
+  while (usb_received == 0);
+  usb_received = 0;
+  if (usb_buf[0] == 0)
+  {
+	  systemMode = MANUAL;
+  }else
+  {
+	  systemMode = AUTO;
+  }
 
   while (1)
   {
-	  test_servo();
-	  continue;
+//	  robotTest();
+//	  HAL_Delay(1000);
+//	  continue;
 	  if (systemMode == MANUAL)
 	  {
 		  switch (systemState)
@@ -147,11 +150,11 @@ int main(void)
 		  case IDLE:
 			  if (usb_received == 1)
 			  {
-				  if (data_equal(usb_buf, 11, "color_setup"))
+				  if (dataEqual(usb_buf, 11, "color_setup"))
 				  {
 					  systemState = SETUP;
 					  usb_received = 0;
-				  }else if (data_equal(usb_buf, 11, "rubik_solve"))
+				  }else if (dataEqual(usb_buf, 11, "rubik_solve"))
 				  {
 					  systemState = SOLVE;
 					  usb_received = 0;
@@ -159,31 +162,41 @@ int main(void)
 			  }
 			  break;
 		  case SETUP:
-			  color_setup();
-			  color_loaded = 1;
+			  manualColorSetup();
 			  systemState = IDLE;
 			  break;
 		  case SOLVE:
-			  rubik_solve();
+			  manualRubikSolve();
 			  systemState = IDLE;
 			  break;
 		  }
 	  }else
 	  {
-		  //TODO
-
-		  //Receiving solution
-		  while (usb_received == 0);
-		  usb_received = 0;
-		  HAL_Delay(USB_SPACE_DELAY);
-		  if (data_equal(usb_buf, usb_len, "done"))
+		  switch (systemState)
 		  {
-			  continue;
+		  case IDLE:
+			  if (usb_received == 1)
+			  {
+				  if (dataEqual(usb_buf, 11, "color_setup"))
+				  {
+					  systemState = SETUP;
+					  usb_received = 0;
+				  }else if (dataEqual(usb_buf, 11, "rubik_solve"))
+				  {
+					  systemState = SOLVE;
+					  usb_received = 0;
+				  }
+			  }
+			  break;
+		  case SETUP:
+			  autoColorSetup();
+			  systemState = IDLE;
+			  break;
+		  case SOLVE:
+			  autoRubikSolve();
+			  systemState = IDLE;
+			  break;
 		  }
-		  turn(usb_buf, usb_len);
-
-		  CDC_Transmit_FS(usb_buf, usb_len);
-		  HAL_Delay(USB_SPACE_DELAY);
 	  }
     /* USER CODE END WHILE */
 
@@ -518,66 +531,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void load_color()
-{
-	// Read color from stored file
-	for (int i = 0; i < 6; ++i)
-	{
-		uint8_t ack = 1;
-		CDC_Transmit_FS(&ack, 1);
-		HAL_Delay(USB_SPACE_DELAY);
-		while (usb_received == 0 && usb_len != 3);
-		usb_received = 0;
-		set_color_range(i, usb_buf[0], usb_buf[1], usb_buf[2]);
-	}
-}
-
-void rubik_solve()
-{
-	uint8_t need_load = 1; // 1: need load, 0: not need load
-	if (color_loaded == 0)
-	{
-		CDC_Transmit_FS(&need_load, 1);
-		HAL_Delay(USB_SPACE_DELAY);
-		load_color();
-		color_loaded = 1;
-	}else
-	{
-		need_load = 0;
-		CDC_Transmit_FS(&need_load, 1);
-		HAL_Delay(USB_SPACE_DELAY);
-	}
-
-	for (int i = 0; i < 48; ++i)
-	{
-		while (usb_received == 0);
-		usb_received = 0;
-		enum color c = read_color();
-		CDC_Transmit_FS((uint8_t*)&c, 1);
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	}
-}
-
-void init_servos()
-{
-	init_servo(&arm_timer[0], &arm_channel[0], htim2, TIM_CHANNEL_1);
-	init_servo(&hand_timer[0], &hand_channel[0], htim2, TIM_CHANNEL_2);
-	init_servo(&grip_timer[0], &grip_channel[0], htim2, TIM_CHANNEL_3);
-
-	init_servo(&arm_timer[1], &arm_channel[1], htim2, TIM_CHANNEL_4);
-	init_servo(&hand_timer[1], &hand_channel[1], htim3, TIM_CHANNEL_1);
-	init_servo(&grip_timer[1], &grip_channel[1], htim3, TIM_CHANNEL_2);
-
-	init_servo(&arm_timer[2], &arm_channel[2], htim3, TIM_CHANNEL_3);
-	init_servo(&hand_timer[2], &hand_channel[2], htim3, TIM_CHANNEL_4);
-	init_servo(&grip_timer[2], &grip_channel[2], htim4, TIM_CHANNEL_1);
-
-	init_servo(&arm_timer[3], &arm_channel[3], htim4, TIM_CHANNEL_2);
-	init_servo(&hand_timer[3], &hand_channel[3], htim4, TIM_CHANNEL_3);
-	init_servo(&grip_timer[3], &grip_channel[3], htim4, TIM_CHANNEL_4);
-}
-
-void init_pwms()
+void pwmsInit()
 {
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);

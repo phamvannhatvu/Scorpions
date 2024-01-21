@@ -7,127 +7,213 @@
 
 #include "solver.h"
 
-void RMove()
+uint8_t color_loaded = 0;
+
+/* Private functions*/
+
+void turnByMove(uint8_t* moves, uint8_t move_len)
 {
-	for (int i = 0; i < 1; ++i)
+	if (dataEqual(moves, move_len, "R"))
 	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
+		robotMoveRightNormal();
+	}else if (dataEqual(moves, move_len, "R'"))
+	{
+		robotMoveRightInvert();
+	}else if (dataEqual(moves, move_len, "L"))
+	{
+		robotMoveLeftNormal();
+	}else if (dataEqual(moves, move_len, "L'"))
+	{
+		robotMoveLeftInvert();
+	}else if (dataEqual(moves, move_len, "F"))
+	{
+		robotMoveFrontNormal();
+	}else if (dataEqual(moves, move_len, "F'"))
+	{
+		robotMoveFrontInvert();
+	}else if (dataEqual(moves, move_len, "B"))
+	{
+		robotMoveBackNormal();
+	}else if (dataEqual(moves, move_len, "B'"))
+	{
+		robotMoveBackInvert();
+	}else if (dataEqual(moves, move_len, "z"))
+	{
+		robotFlipZNormal();
+	}else if (dataEqual(moves, move_len, "z'"))
+	{
+		robotFlipZInvert();
 	}
 }
 
-void RInvertMove()
+void loadColor()
 {
-	for (int i = 0; i < 2; ++i)
+	uint8_t need_load = 1; // 1: need load, 0: not need load
+	if (color_loaded == 0)
 	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
+		CDC_Transmit_FS(&need_load, 1);
+		HAL_Delay(USB_SPACE_DELAY);
+		// Read color from stored file
+		for (int i = 0; i < 6; ++i)
+		{
+			uint8_t ack = 1;
+			CDC_Transmit_FS(&ack, 1);
+			HAL_Delay(USB_SPACE_DELAY);
+			while (usb_received == 0 && usb_len != 3);
+			usb_received = 0;
+			setColorRange(i, usb_buf[0], usb_buf[1], usb_buf[2]);
+		}
+		color_loaded = 1;
+	}else
+	{
+		need_load = 0;
+		CDC_Transmit_FS(&need_load, 1);
+		HAL_Delay(USB_SPACE_DELAY);
 	}
 }
 
-void LMove()
+void colorCalculate(uint8_t color, uint8_t avg_colors[])
 {
-	for (int i = 0; i < 3; ++i)
+	// Read color
+	uint32_t red_sum = 0;
+	uint32_t blue_sum = 0;
+	uint32_t green_sum = 0;
+	for (uint16_t j = 0; j < NUM_COLOR_SETUP; ++j)
 	{
+		uint8_t colors[3] = {0,0,0};
+		readRGB(colors, colors + 1, colors + 2);
+		red_sum += colors[0];
+		green_sum += colors[1];
+		blue_sum += colors[2];
+		HAL_Delay(readColor_DELAY);
+	}
+	setColorRange(color, 1.0 * red_sum / NUM_COLOR_SETUP,
+			1.0 * green_sum / NUM_COLOR_SETUP,
+			1.0 * blue_sum / NUM_COLOR_SETUP);
+	avg_colors[0] = red_sum / NUM_COLOR_SETUP;
+	avg_colors[1] = green_sum / NUM_COLOR_SETUP;
+	avg_colors[2] = blue_sum / NUM_COLOR_SETUP;
+}
+
+void waitFromPC()
+{
+	while (usb_received == 0);
+	usb_received = 0;
+	HAL_Delay(USB_SPACE_DELAY);
+}
+
+void changeFaceToBeRead(uint8_t face_index)
+{
+	switch (face_index)
+	{
+	case 0:
+		robotFlipZNormal();
+		break;
+	case 1:
+		robotFlipZNormal();
+		break;
+	case 2:
+		robotFlipZNormal();
+		break;
+	case 3:
+		robotFlipZNormal();
+		robotFlipXNormal();
+		robotFlipZNormal();
+		break;
+	case 4:
+		robotFlipZDouble();
+		break;
+	case 5:
+		robotFlipZNormal();
+		robotFlipXInvert();
+		break;
+	}
+}
+/* End of private functions*/
+
+void manualColorSetup()
+{
+	for (uint8_t i = 0; i < 6; ++i)
+	{
+		waitFromPC();
 		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
+
+		uint8_t avg_colors[3];
+		colorCalculate(i, avg_colors);
+
+		CDC_Transmit_FS(avg_colors, 3);
+		HAL_Delay(USB_SPACE_DELAY);
+	}
+	color_loaded = 1;
+}
+
+void manualRubikSolve()
+{
+	loadColor();
+
+	for (int i = 0; i < 48; ++i)
+	{
+		waitFromPC();
+		enum color c = readColor();
+		CDC_Transmit_FS((uint8_t*)&c, 1);
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	}
 }
 
-void LInvertMove()
+void autoColorSetup()
 {
-	for (int i = 0; i < 4; ++i)
+	for (uint8_t i = 0; i < 6; ++i)
 	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
+		uint8_t avg_colors[3];
+		colorCalculate(i, avg_colors);
+
+		CDC_Transmit_FS(avg_colors, 3);
+		HAL_Delay(USB_SPACE_DELAY);
+
+		waitFromPC();
+		changeFaceToBeRead(i);
+
 	}
+	color_loaded = 1;
 }
 
-void FMove()
+void autoRubikSolve()
 {
-	for (int i = 0; i < 5; ++i)
-	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
-	}
-}
+	loadColor();
 
-void FInvertMove()
-{
-	for (int i = 0; i < 6; ++i)
+	// Set up initial state for the first face
+	robotReadColorInit();
+	for (int i = 0; i < 48; ++i)
 	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
-	}
-}
+		enum color cell_color = readColor();
+		CDC_Transmit_FS((uint8_t*)&cell_color, 1);
+		waitFromPC();
 
-void BMove()
-{
-	for (int i = 0; i < 7; ++i)
-	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
-	}
-}
+		// Read next cell
+		robotReadColor(i % 8);
 
-void BInvertMove()
-{
-	for (int i = 0; i < 8; ++i)
-	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
-	}
-}
+		// Change face to read if current face reading is done
+		if (i % 8 == 7)
+		{
+			changeFaceToBeRead(i / 8);
+			// Set up initial state for the new face
+			robotReadColorInit();
+		}
 
-void zMove()
-{
-	for (int i = 0; i < 9; ++i)
-	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
 	}
-}
 
-void zInvertMove()
-{
-	for (int i = 0; i < 0; ++i)
+	uint8_t start_solving = 1;
+	CDC_Transmit_FS(&start_solving, 1);
+	// Turn the cube according to the solution's moves
+	while (1)
 	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
-	}
-}
-
-void turn(uint8_t* moves, uint8_t move_len)
-{
-	if (data_equal(moves, move_len, "R"))
-	{
-		RMove();
-	}else if (data_equal(moves, move_len, "R'"))
-	{
-		RInvertMove();
-	}else if (data_equal(moves, move_len, "L"))
-	{
-		LMove();
-	}else if (data_equal(moves, move_len, "L'"))
-	{
-		LInvertMove();
-	}else if (data_equal(moves, move_len, "F"))
-	{
-		FMove();
-	}else if (data_equal(moves, move_len, "F'"))
-	{
-		FInvertMove();
-	}else if (data_equal(moves, move_len, "B"))
-	{
-		BMove();
-	}else if (data_equal(moves, move_len, "B'"))
-	{
-		BInvertMove();
-	}else if (data_equal(moves, move_len, "z"))
-	{
-		zMove();
-	}else if (data_equal(moves, move_len, "z'"))
-	{
-		zInvertMove();
+		waitFromPC();
+		if (dataEqual(usb_buf, usb_len, "done"))
+		{
+			break;
+		}
+		turnByMove(usb_buf, usb_len);
+		uint8_t ack = 1;
+		CDC_Transmit_FS(&ack, 1);
 	}
 }
