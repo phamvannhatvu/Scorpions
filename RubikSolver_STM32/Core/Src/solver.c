@@ -80,8 +80,9 @@ void colorCalculate(uint8_t color, uint8_t avg_colors[])
 	uint32_t green_sum = 0;
 	for (uint16_t j = 0; j < NUM_COLOR_SETUP; ++j)
 	{
-		uint8_t colors[3] = {0,0,0};
-		readRGB(colors, colors + 1, colors + 2);
+		uint8_t colors[3] = {color, color, color};
+		// For test
+//		readRGB(colors, colors + 1, colors + 2);
 		red_sum += colors[0];
 		green_sum += colors[1];
 		blue_sum += colors[2];
@@ -121,7 +122,8 @@ void changeFaceToBeRead(uint8_t face_index)
 		robotFlipZNormal();
 		break;
 	case 4:
-		robotFlipZDouble();
+		robotFlipZNormal();
+		robotFlipZNormal();
 		break;
 	case 5:
 		robotFlipZNormal();

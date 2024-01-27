@@ -31,7 +31,7 @@
 #define ARM_NUMBER 4
 #define ARM_UNDEFINED ARM_NUMBER
 
-#define ARM_HOLD 55
+#define ARM_HOLD 57
 #define ARM_RELEASE 65
 #define ARM_RELAX 85
 
@@ -41,8 +41,8 @@
 #define ARM_NORTHEAST 45
 #define ARM_EASTWARD 0
 
-#define ARM_FORWARD 25
-#define ARM_BACKWARD 5
+#define ARM_FORWARD 18
+#define ARM_BACKWARD 0
 
 typedef struct {
 	uint8_t gripperID;

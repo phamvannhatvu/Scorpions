@@ -202,7 +202,18 @@ void auto_color_setup()
 
     for (int i = 0; i < 6; ++i)
     {
+        if (i == 4)
+        {
+            Sleep(40000);
+        } else if (i == 5)
+        {
+            Sleep(30000);
+        }
+        {
+            Sleep(10000);
+        }
         read_usb(buf_in, 3);
+        printf("%d %d %d\n", buf_in[0], buf_in[1], buf_in[2]); // RGB
         fprintf(file_color_ptr, "%d %d %d\n", buf_in[0], buf_in[1], buf_in[2]); // RGB
 
         buf_out[0] = 1; // "Change face signal"

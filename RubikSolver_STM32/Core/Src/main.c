@@ -127,6 +127,8 @@ int main(void)
   robotInit();
   colorSensorInit();
 
+  robotBoot();
+
   // Waiting user for select mode
   while (usb_received == 0);
   usb_received = 0;
@@ -141,6 +143,7 @@ int main(void)
   while (1)
   {
 //	  robotTest();
+//	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 //	  HAL_Delay(1000);
 //	  continue;
 	  if (systemMode == MANUAL)

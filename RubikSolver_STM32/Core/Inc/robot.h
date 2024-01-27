@@ -48,10 +48,8 @@ void robotMoveBackDouble(void);
 
 void robotFlipXNormal(void);
 void robotFlipXInvert(void);
-void robotFlipXDouble(void);
 void robotFlipZNormal(void);
 void robotFlipZInvert(void);
-void robotFlipZDouble(void);
 
 void robotReadColorInit(void);
 void robotReadColor(uint8_t step);

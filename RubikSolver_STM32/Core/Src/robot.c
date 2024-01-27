@@ -31,14 +31,16 @@ static robotState state;
 static robotMovingArm movingArm;
 static robotFlippingArm flippingArm;
 
-void robotFree(void) {
+void robotFree(void)
+{
 	state = FREE;
 	movingArm.armID = ARM_UNDEFINED;
 	flippingArm.firstArmID = ARM_UNDEFINED;
 	flippingArm.secondArmID = ARM_UNDEFINED;
 }
 
-void robotInit(void) {
+void robotInit(void)
+{
 	state = INIT;
 	movingArm.armID = ARM_UNDEFINED;
 	flippingArm.firstArmID = ARM_UNDEFINED;
@@ -50,12 +52,12 @@ void robotInit(void) {
 	leftGripper = servoStart(&htim2, TIM_CHANNEL_1, 0);
 	frontGripper = servoStart(&htim2, TIM_CHANNEL_2, 0);
 	rightGripper = servoStart(&htim2, TIM_CHANNEL_3, 0);
-	backGripper = servoStart(&htim2, TIM_CHANNEL_4, 0);
+	backGripper = servoStart(&htim2, TIM_CHANNEL_4, -7);
 
-	leftWrist = servoStart(&htim3, TIM_CHANNEL_1, 0);
+	leftWrist = servoStart(&htim3, TIM_CHANNEL_1, -7);
 	frontWrist = servoStart(&htim3, TIM_CHANNEL_2, 0);
 	rightWrist = servoStart(&htim3, TIM_CHANNEL_3, 0);
-	backWrist = servoStart(&htim3, TIM_CHANNEL_4, 0);
+	backWrist = servoStart(&htim3, TIM_CHANNEL_4, -5);
 
 	leftElbow = servoStart(&htim4, TIM_CHANNEL_1, 0);
 	frontElbow = servoStart(&htim4, TIM_CHANNEL_2, 0);
@@ -68,32 +70,33 @@ void robotInit(void) {
 	backArm = armStart(backGripper, backWrist, backElbow);
 }
 
-void robotBoot(void) {
+void robotBoot(void)
+{
 	HAL_Delay(1000);
 	servoRun();
 	HAL_Delay(1000);
 	armRun();
-	HAL_Delay(1000);
+	HAL_Delay(3000);
+	armRelease(&arms[rightArm]);
+	HAL_Delay(2000);
 	armHold(&arms[rightArm]);
-	HAL_Delay(1000);
-	armForward(&arms[leftArm]);
-	HAL_Delay(1000);
-	armForward(&arms[frontArm]);
-	HAL_Delay(1000);
+	HAL_Delay(2000);
 	armForward(&arms[rightArm]);
-	HAL_Delay(1000);
+	HAL_Delay(2000);
+	armForward(&arms[leftArm]);
+	HAL_Delay(2000);
+	armForward(&arms[frontArm]);
 	armForward(&arms[backArm]);
-	HAL_Delay(1000);
+	HAL_Delay(2000);
 	armHold(&arms[leftArm]);
-	HAL_Delay(1000);
 	armHold(&arms[frontArm]);
-	HAL_Delay(1000);
 	armHold(&arms[backArm]);
 	HAL_Delay(1000);
 	robotFree();
 }
 
-void robotMoveReturn(void) {
+void robotMoveReturn(void)
+{
 	HAL_Delay(1000);
 	armRelease(&arms[movingArm.armID]);
 	HAL_Delay(1000);
@@ -108,7 +111,8 @@ void robotMoveReturn(void) {
 	robotFree();
 }
 
-void robotMoveNormal(void) {
+void robotMoveNormal(void)
+{
 	if (state != FREE) return;
 	state = BUSY;
 	HAL_Delay(1000);
@@ -117,7 +121,8 @@ void robotMoveNormal(void) {
 	robotMoveReturn();
 }
 
-void robotMoveInvert(void) {
+void robotMoveInvert(void)
+{
 	if (state != FREE) return;
 	state = BUSY;
 	HAL_Delay(1000);
@@ -126,7 +131,8 @@ void robotMoveInvert(void) {
 	robotMoveReturn();
 }
 
-void robotMoveDouble(void) {
+void robotMoveDouble(void)
+{
 	if (state != FREE) return;
 	state = BUSY;
 	HAL_Delay(1000);
@@ -145,32 +151,39 @@ void robotMoveDouble(void) {
 	robotMoveReturn();
 }
 
-void robotMoveLeftNormal(void) {
+void robotMoveLeftNormal(void)
+{
 	movingArm.armID = leftArm;
 	robotMoveNormal();
 }
 
-void robotMoveLeftInvert(void) {
+void robotMoveLeftInvert(void)
+{
 	movingArm.armID = leftArm;
 	robotMoveInvert();
 }
 
-void robotMoveLeftDouble(void) {
+void robotMoveLeftDouble(void)
+{
 	movingArm.armID = leftArm;
 	robotMoveDouble();
 }
 
-void robotMoveFrontNormal(void) {
+void robotMoveFrontNormal(void)
+{
 	movingArm.armID = frontArm;
 	robotMoveNormal();
 }
 
-void robotMoveFrontInvert(void) {
+void robotMoveFrontInvert(void)
+{
 	movingArm.armID = frontArm;
 	robotMoveInvert();
 }
 
-void robotMoveFrontDouble(void) {
+void robotMoveFrontDouble(void)
+
+{
 	movingArm.armID = frontArm;
 	robotMoveDouble();
 }
@@ -180,22 +193,26 @@ void robotMoveRightNormal(void) {
 	robotMoveNormal();
 }
 
-void robotMoveRightInvert(void) {
+void robotMoveRightInvert(void)
+{
 	movingArm.armID = rightArm;
 	robotMoveInvert();
 }
 
-void robotMoveRightDouble(void) {
+void robotMoveRightDouble(void)
+{
 	movingArm.armID = rightArm;
 	robotMoveDouble();
 }
 
-void robotMoveBackNormal(void) {
+void robotMoveBackNormal(void)
+{
 	movingArm.armID = backArm;
 	robotMoveNormal();
 }
 
-void robotMoveBackInvert(void) {
+void robotMoveBackInvert(void)
+{
 	movingArm.armID = backArm;
 	robotMoveInvert();
 }
@@ -206,70 +223,14 @@ void robotMoveBackDouble(void)
 	robotMoveDouble();
 }
 
-void robotFlipNormal(void) {
-	if (state != FREE) return;
-	state = BUSY;
+void robotFlipReturn(void)
+{
 	HAL_Delay(1000);
-	armRelease(&arms[flippingArm.thirdArmID]);
-	armRelease(&arms[flippingArm.fourthArmID]);
+	armForward(&arms[flippingArm.thirdArmID]);
+	armForward(&arms[flippingArm.fourthArmID]);
 	HAL_Delay(1000);
-	armBackward(&arms[flippingArm.thirdArmID]);
-	armBackward(&arms[flippingArm.fourthArmID]);
-	HAL_Delay(1000);
-	armEastward(&arms[flippingArm.firstArmID]);
-	armWestward(&arms[flippingArm.secondArmID]);
-	HAL_Delay(1000);
-	robotMoveReturn();
-}
-
-void robotFlipInvert(void) {
-	if (state != FREE) return;
-	state = BUSY;
-	HAL_Delay(1000);
-	armRelease(&arms[flippingArm.thirdArmID]);
-	armRelease(&arms[flippingArm.fourthArmID]);
-	HAL_Delay(1000);
-	armBackward(&arms[flippingArm.thirdArmID]);
-	armBackward(&arms[flippingArm.fourthArmID]);
-	HAL_Delay(1000);
-	armWestward(&arms[flippingArm.firstArmID]);
-	armEastward(&arms[flippingArm.secondArmID]);
-	HAL_Delay(1000);
-	robotMoveReturn();
-}
-
-void robotFlipDouble(void) {
-	if (state != FREE) return;
-	state = BUSY;
-	HAL_Delay(1000);
-	armRelease(&arms[flippingArm.thirdArmID]);
-	armRelease(&arms[flippingArm.fourthArmID]);
-	HAL_Delay(1000);
-	armBackward(&arms[flippingArm.thirdArmID]);
-	armBackward(&arms[flippingArm.fourthArmID]);
-	HAL_Delay(1000);
-	armRelease(&arms[flippingArm.firstArmID]);
-	armRelease(&arms[flippingArm.secondArmID]);
-	HAL_Delay(1000);
-	armBackward(&arms[flippingArm.firstArmID]);
-	armBackward(&arms[flippingArm.secondArmID]);
-	HAL_Delay(1000);
-	armEastward(&arms[flippingArm.firstArmID]);
-	armWestward(&arms[flippingArm.secondArmID]);
-	HAL_Delay(1000);
-	armForward(&arms[flippingArm.firstArmID]);
-	armForward(&arms[flippingArm.secondArmID]);
-	HAL_Delay(1000);
-	armHold(&arms[flippingArm.firstArmID]);
-	armHold(&arms[flippingArm.secondArmID]);
-	HAL_Delay(1000);
-	armWestward(&arms[flippingArm.firstArmID]);
-	armEastward(&arms[flippingArm.secondArmID]);
-	HAL_Delay(1000);
-	robotMoveReturn();
-}
-
-void robotFlipReturn(void) {
+	armHold(&arms[flippingArm.thirdArmID]);
+	armHold(&arms[flippingArm.fourthArmID]);
 	HAL_Delay(1000);
 	armRelease(&arms[flippingArm.firstArmID]);
 	armRelease(&arms[flippingArm.secondArmID]);
@@ -285,14 +246,39 @@ void robotFlipReturn(void) {
 	HAL_Delay(1000);
 	armHold(&arms[flippingArm.firstArmID]);
 	armHold(&arms[flippingArm.secondArmID]);
-	HAL_Delay(1000);
-	armForward(&arms[flippingArm.thirdArmID]);
-	armForward(&arms[flippingArm.fourthArmID]);
-	HAL_Delay(1000);
-	armHold(&arms[flippingArm.thirdArmID]);
-	armHold(&arms[flippingArm.fourthArmID]);
-	HAL_Delay(1000);
 	robotFree();
+}
+
+void robotFlipNormal(void) {
+	if (state != FREE) return;
+	state = BUSY;
+	HAL_Delay(1000);
+	armRelease(&arms[flippingArm.thirdArmID]);
+	armRelease(&arms[flippingArm.fourthArmID]);
+	HAL_Delay(1000);
+	armBackward(&arms[flippingArm.thirdArmID]);
+	armBackward(&arms[flippingArm.fourthArmID]);
+	HAL_Delay(1000);
+	armEastward(&arms[flippingArm.firstArmID]);
+	armWestward(&arms[flippingArm.secondArmID]);
+	HAL_Delay(1000);
+	robotFlipReturn();
+}
+
+void robotFlipInvert(void) {
+	if (state != FREE) return;
+	state = BUSY;
+	HAL_Delay(1000);
+	armRelease(&arms[flippingArm.thirdArmID]);
+	armRelease(&arms[flippingArm.fourthArmID]);
+	HAL_Delay(1000);
+	armBackward(&arms[flippingArm.thirdArmID]);
+	armBackward(&arms[flippingArm.fourthArmID]);
+	HAL_Delay(1000);
+	armWestward(&arms[flippingArm.firstArmID]);
+	armEastward(&arms[flippingArm.secondArmID]);
+	HAL_Delay(1000);
+	robotFlipReturn();
 }
 
 void robotFlipXNormal(void)
@@ -313,19 +299,10 @@ void robotFlipXInvert(void)
 	robotFlipInvert();
 }
 
-void robotFlipXDouble(void)
-{
-	flippingArm.firstArmID = rightArm;
-	flippingArm.secondArmID = leftArm;
-	flippingArm.thirdArmID = frontArm;
-	flippingArm.fourthArmID = backArm;
-	robotFlipDouble();
-}
-
 void robotFlipZNormal(void)
 {
-	flippingArm.firstArmID = frontArm;
-	flippingArm.secondArmID = backArm;
+	flippingArm.firstArmID = backArm;
+	flippingArm.secondArmID = frontArm;
 	flippingArm.thirdArmID = rightArm;
 	flippingArm.fourthArmID = leftArm;
 	robotFlipNormal();
@@ -333,20 +310,11 @@ void robotFlipZNormal(void)
 
 void robotFlipZInvert(void)
 {
-	flippingArm.firstArmID = frontArm;
-	flippingArm.secondArmID = backArm;
+	flippingArm.firstArmID = backArm;
+	flippingArm.secondArmID = frontArm;
 	flippingArm.thirdArmID = rightArm;
 	flippingArm.fourthArmID = leftArm;
 	robotFlipInvert();
-}
-
-void robotFlipZDouble(void)
-{
-	flippingArm.firstArmID = frontArm;
-	flippingArm.secondArmID = backArm;
-	flippingArm.thirdArmID = rightArm;
-	flippingArm.fourthArmID = leftArm;
-	robotFlipDouble();
 }
 
 void robotReadColorInit(void)
@@ -419,7 +387,7 @@ void robotTest(void)
 	uint8_t j = leftGripper;
 	if (i == 0)
 	{
-		servos[j].target = 0;
+		servos[j].target = 45;
 		i = 1;
 	}
 	else if (i == 1)
@@ -429,7 +397,7 @@ void robotTest(void)
 	}
 	else if (i == 2)
 	{
-		servos[j].target = 180;
+		servos[j].target = 0;
 		i = 0;
 	}
 	else
