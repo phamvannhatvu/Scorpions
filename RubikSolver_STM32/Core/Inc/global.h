@@ -15,6 +15,7 @@ extern uint8_t usb_buf[200];
 extern uint8_t usb_len;
 extern uint8_t usb_received;
 
+extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;

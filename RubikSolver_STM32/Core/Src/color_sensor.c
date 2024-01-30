@@ -33,6 +33,9 @@ void writeI2CByte(uint8_t reg_addr, uint8_t *data)
 
 void colorSensorInit()
 {
+	// Adjust sensor's LED brightness
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	__HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_1, 500);
 	uint8_t en[1] = {0xB};
 	writeI2CByte(EN_ADDR, en);
 	HAL_Delay(3);

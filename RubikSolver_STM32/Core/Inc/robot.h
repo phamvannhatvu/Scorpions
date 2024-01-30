@@ -12,6 +12,15 @@
 #include "arm.h"
 #include "servo.h"
 
+#define ROBOT_MANUALDURATION 2999
+#define ROBOT_AUTODURATION 499
+
+#define ROBOT_BOOT (9 * ROBOT_MANUALDURATION)
+#define ROBOT_TURNSINGLE (10 * ROBOT_AUTODURATION)
+#define ROBOT_TURNDOUBLE (12 * ROBOT_AUTODURATION)
+#define ROBOT_FLIPSINGLE (11 * ROBOT_AUTODURATION)
+#define ROBOT_FLIPDOUBLE (16 * ROBOT_AUTODURATION)
+
 typedef enum {
 	INIT,
 	FREE,
@@ -20,7 +29,7 @@ typedef enum {
 
 typedef struct {
 	uint8_t armID;
-} robotMovingArm;
+} robotTurningArm;
 
 typedef struct {
 	uint8_t firstArmID;
@@ -30,30 +39,33 @@ typedef struct {
 } robotFlippingArm;
 
 void robotInit(void);
-
+void robotShutDown(void);
 void robotBoot(void);
 
-void robotMoveLeftNormal(void);
-void robotMoveLeftInvert(void);
-void robotMoveLeftDouble(void);
-void robotMoveFrontNormal(void);
-void robotMoveFrontInvert(void);
-void robotMoveFrontDouble(void);
-void robotMoveRightNormal(void);
-void robotMoveRightInvert(void);
-void robotMoveRightDouble(void);
-void robotMoveBackNormal(void);
-void robotMoveBackInvert(void);
-void robotMoveBackDouble(void);
+void robotTurnLeftNormal(void);
+void robotTurnLeftInvert(void);
+void robotTurnLeftDouble(void);
+void robotTurnFrontNormal(void);
+void robotTurnFrontInvert(void);
+void robotTurnFrontDouble(void);
+void robotTurnRightNormal(void);
+void robotTurnRightInvert(void);
+void robotTurnRightDouble(void);
+void robotTurnBackNormal(void);
+void robotTurnBackInvert(void);
+void robotTurnBackDouble(void);
 
 void robotFlipXNormal(void);
 void robotFlipXInvert(void);
+void robotFlipXDouble(void);
 void robotFlipZNormal(void);
 void robotFlipZInvert(void);
+void robotFlipZDouble(void);
 
 void robotReadColorInit(void);
 void robotReadColor(uint8_t step);
-
+void robotReadColorInit(void);
+void robotChangeFaceInit(void);
 void robotTest(void);
 
 #endif /* INC_ROBOT_H_ */

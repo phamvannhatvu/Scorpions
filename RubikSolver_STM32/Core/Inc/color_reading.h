@@ -14,7 +14,7 @@
 
 #define USB_SPACE_DELAY 1000 //delay between consecutive usb transmit and receive
 
-enum color{RED, WHITE, ORANGE, YELLOW, GREEN, BLUE, INVALID_COLOR};
+enum color{GREEN, YELLOW, BLUE, WHITE, RED, ORANGE, INVALID_COLOR};
 struct avg_color
 {
 	float red;

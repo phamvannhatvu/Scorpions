@@ -5,18 +5,15 @@
 
 //move r 45 deg clock-wise to read each cell
 const int color_read_order[] = {
-    35, 13, 42, 26, 51, 22, 40, 11, //11, 40, 22, 51, 26, 42, 13, // (R:35) -> f
-    30, 15, 36, 12, 34, 9, 32, 6, //6, 32, 9, 34, 12, 36, 15, // (U:30) -> f
-    47, 28, 44, 17, 31, 7, 38, 20, //20, 38, 7, 31, 17, 44, 28, // (L: 47) -> f
-    50, 24, 52, 27, 46, 18, 48, 21, //21, 48, 18, 46, 27, 52, 24, // (D: 50) -> f
-    // RED (right side) -> r -> f -> GREEN (right side)
-    39, 8, 33, 10, 41, 23, 49, 19, // 19, 49, 23, 41, 10, 33, 8, // (F: 39)
-    // GREEN -> f -> f -> BLUE
-    43, 14, 37, 16, 45, 29, 53, 25, //25, 53, 29, 45, 16, 37, 14 // (B: 43)
-    // BLUE -> f -> r' -> RED
+    39, 8, 49, 19, 41, 23, 33, 10,
+    46, 18, 52, 27, 50, 24, 48, 21,
+    45, 29, 37, 16, 43, 14, 53, 25,
+    30, 15, 32, 6, 34, 9, 36, 12,
+    51, 22, 42, 26, 35, 13, 40, 11,
+    47, 28, 38, 20, 31, 7, 44, 17,
 };
 
-const char * color_by_id[] = {"red", "white", "orange", "yellow", "green", "blue"};
+const char * color_by_id[] = {"green", "yellow", "blue", "white", "red", "orange"};
 
 enum SOLVING_MODE {
     MANUAL,
@@ -184,7 +181,6 @@ void manual_rubik_solve()
         }
         write_usb(buf_out, 1);
 
-        Sleep(1);
         read_usb(buf_in, 1);
         printf("%s\n", color_by_id[buf_in[0]]);
         set_cube_color(cube_color, buf_in, i);
@@ -208,7 +204,7 @@ void auto_color_setup()
         } else if (i == 5)
         {
             Sleep(30000);
-        }
+        } else 
         {
             Sleep(10000);
         }
@@ -234,7 +230,26 @@ void auto_rubik_solve()
 
     for (int i = 0; i < 48; ++i)
     {
-        Sleep(1);
+        if (i % 8 != 0)
+        {
+            if (i % 2 == 0)
+            {
+                Sleep(10000);
+            } else 
+            {
+                Sleep(2000);
+            }
+        }else if (i != 0)
+        {
+            if (i / 8 == 4)
+            {
+                Sleep(40000);
+            } else 
+            {
+                Sleep(10000);
+            }
+        }
+
         read_usb(buf_in, 1);
         printf("%s\n", color_by_id[buf_in[0]]);
         set_cube_color(cube_color, buf_in, i);
@@ -253,11 +268,11 @@ void auto_rubik_solve()
     while (fscanf(outputPtr, "%s", &move) != EOF)
     {
         write_usb((uint8_t*)move, (uint16_t)strlen(move));
-        Sleep(1);
+        Sleep(3000);
 
         uint8_t ack;
         read_usb(&ack, 1);
-        Sleep(1);
+        Sleep(3000);
     }
     // Done signal
     char *done = "done";

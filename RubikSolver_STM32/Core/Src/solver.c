@@ -15,28 +15,28 @@ void turnByMove(uint8_t* moves, uint8_t move_len)
 {
 	if (dataEqual(moves, move_len, "R"))
 	{
-		robotMoveRightNormal();
+		robotTurnRightNormal();
 	}else if (dataEqual(moves, move_len, "R'"))
 	{
-		robotMoveRightInvert();
+		robotTurnRightInvert();
 	}else if (dataEqual(moves, move_len, "L"))
 	{
-		robotMoveLeftNormal();
+		robotTurnLeftNormal();
 	}else if (dataEqual(moves, move_len, "L'"))
 	{
-		robotMoveLeftInvert();
+		robotTurnLeftInvert();
 	}else if (dataEqual(moves, move_len, "F"))
 	{
-		robotMoveFrontNormal();
+		robotTurnFrontNormal();
 	}else if (dataEqual(moves, move_len, "F'"))
 	{
-		robotMoveFrontInvert();
+		robotTurnFrontInvert();
 	}else if (dataEqual(moves, move_len, "B"))
 	{
-		robotMoveBackNormal();
+		robotTurnBackNormal();
 	}else if (dataEqual(moves, move_len, "B'"))
 	{
-		robotMoveBackInvert();
+		robotTurnBackInvert();
 	}else if (dataEqual(moves, move_len, "z"))
 	{
 		robotFlipZNormal();
@@ -81,8 +81,7 @@ void colorCalculate(uint8_t color, uint8_t avg_colors[])
 	for (uint16_t j = 0; j < NUM_COLOR_SETUP; ++j)
 	{
 		uint8_t colors[3] = {color, color, color};
-		// For test
-//		readRGB(colors, colors + 1, colors + 2);
+		readRGB(colors, colors + 1, colors + 2);
 		red_sum += colors[0];
 		green_sum += colors[1];
 		blue_sum += colors[2];
@@ -108,26 +107,25 @@ void changeFaceToBeRead(uint8_t face_index)
 	switch (face_index)
 	{
 	case 0:
-		robotFlipZNormal();
+		robotFlipXNormal();
 		break;
 	case 1:
-		robotFlipZNormal();
+		robotFlipXNormal();
 		break;
 	case 2:
-		robotFlipZNormal();
+		robotFlipXNormal();
 		break;
 	case 3:
-		robotFlipZNormal();
 		robotFlipXNormal();
 		robotFlipZNormal();
+		robotFlipXNormal();
 		break;
 	case 4:
-		robotFlipZNormal();
-		robotFlipZNormal();
+		robotFlipXDouble();
 		break;
 	case 5:
-		robotFlipZNormal();
-		robotFlipXInvert();
+		robotFlipXNormal();
+		robotFlipZInvert();
 		break;
 	}
 }
@@ -192,14 +190,16 @@ void autoRubikSolve()
 		waitFromPC();
 
 		// Read next cell
-		robotReadColor(i % 8);
+		robotReadColor(i % 2);
 
 		// Change face to read if current face reading is done
 		if (i % 8 == 7)
 		{
+			// Set up condition for changing face
+			robotChangeFaceInit();
 			changeFaceToBeRead(i / 8);
 			// Set up initial state for the new face
-			robotReadColorInit();
+			if (i != 47) robotReadColorInit();
 		}
 
 	}
