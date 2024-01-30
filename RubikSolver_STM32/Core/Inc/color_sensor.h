@@ -21,12 +21,6 @@
 #define GDATAL 0x18
 #define BDATAL 0x1A
 
-#define readColor_DELAY 10
-#define NUM_COLOR_SETUP 200
-#define NUM_COLOR_READ 100
-#define VALID_DIFF_STEP 15
-#define MAX_DIFF 255
-
 void colorSensorInit();
 void readRGB(uint8_t *red, uint8_t *green, uint8_t *blue);
 

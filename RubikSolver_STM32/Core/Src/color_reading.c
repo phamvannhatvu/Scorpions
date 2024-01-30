@@ -19,43 +19,33 @@ float diff(float a, float b)
 	return (a > b ? a - b : b - a);
 }
 
-void setColorRange(enum color c, float red, float green, float blue)
+void readColor()
 {
-	avg_colors[c].red = red;
-	avg_colors[c].green = green;
-	avg_colors[c].blue = blue;
+	for (uint8_t i = 0; i < NUM_COLOR_READ; ++i)
+	{
+		uint8_t rgb[3];
+		readRGB(rgb, rgb + 1, rgb + 2);
+		CDC_Transmit_FS(rgb, 3);
+		HAL_Delay(USB_SPACE_DELAY);
+	}
 }
 
-enum color readColor()
+// Calculate an average rgb value of the colors
+void colorCalculate(uint8_t color, uint8_t avg_colors[])
 {
-	for (uint8_t valid_diff = 0; valid_diff < MAX_DIFF; valid_diff += VALID_DIFF_STEP)
+	uint32_t red_sum = 0;
+	uint32_t blue_sum = 0;
+	uint32_t green_sum = 0;
+	for (uint16_t j = 0; j < NUM_COLOR_SETUP; ++j)
 	{
-		uint32_t red_sum = 0;
-		uint32_t blue_sum = 0;
-		uint32_t green_sum = 0;
-		for (uint8_t i = 0; i < NUM_COLOR_READ; ++i)
-		{
-			uint8_t red, green, blue;
-			readRGB(&red, &green, &blue);
-			red_sum += red;
-			green_sum += green;
-			blue_sum += blue;
-		}
-
-		float red_avg = 1.0 * red_sum / NUM_COLOR_READ;
-		float green_avg = 1.0 * green_sum / NUM_COLOR_READ;
-		float blue_avg = 1.0 * blue_sum / NUM_COLOR_READ;
-
-		for (uint8_t i = 0; i < 6; ++i)
-		{
-			if (diff(red_avg, avg_colors[i].red) <= valid_diff
-					&& diff(green_avg, avg_colors[i].green) <= valid_diff
-					&& diff(blue_avg, avg_colors[i].blue) <= valid_diff)
-			{
-				return i;
-			}
-		}
+		uint8_t colors[3] = {color, color, color};
+		readRGB(colors, colors + 1, colors + 2);
+		red_sum += colors[0];
+		green_sum += colors[1];
+		blue_sum += colors[2];
+		HAL_Delay(COLOR_READING_DELAY);
 	}
-
-	return INVALID_COLOR;
+	avg_colors[0] = red_sum / NUM_COLOR_SETUP;
+	avg_colors[1] = green_sum / NUM_COLOR_SETUP;
+	avg_colors[2] = blue_sum / NUM_COLOR_SETUP;
 }
