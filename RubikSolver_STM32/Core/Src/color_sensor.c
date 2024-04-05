@@ -13,6 +13,7 @@
  *      Author: ADMIN
  */
 
+// Source code from: https://www.waveshare.com/wiki/TCS34725_Color_Sensor
 
 #include "color_sensor.h"
 
