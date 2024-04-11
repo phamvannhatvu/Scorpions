@@ -8,91 +8,103 @@
 #include "solver.h"
 
 uint8_t color_loaded = 0;
+move solution[100];
+uint8_t solution_len = 0;
 
 /* Private functions*/
 
-void turnByMove(uint8_t* moves, uint8_t move_len)
+void addMoveToSolution(uint8_t* moves, uint8_t move_len)
 {
 	if (dataEqual(moves, move_len, "R"))
 	{
-		robotTurnRightNormal();
+		solution[solution_len] = R;
 	}else if (dataEqual(moves, move_len, "R'"))
 	{
-		robotTurnRightInvert();
+		solution[solution_len] = RN;
 	}else if (dataEqual(moves, move_len, "L"))
 	{
-		robotTurnLeftNormal();
+		solution[solution_len] = L;
 	}else if (dataEqual(moves, move_len, "L'"))
 	{
-		robotTurnLeftInvert();
+		solution[solution_len] = LN;
 	}else if (dataEqual(moves, move_len, "F"))
 	{
-		robotTurnFrontNormal();
+		solution[solution_len] = F;
 	}else if (dataEqual(moves, move_len, "F'"))
 	{
-		robotTurnFrontInvert();
+		solution[solution_len] = FN;
 	}else if (dataEqual(moves, move_len, "B"))
 	{
-		robotTurnBackNormal();
+		solution[solution_len] = B;
 	}else if (dataEqual(moves, move_len, "B'"))
 	{
-		robotTurnBackInvert();
+		solution[solution_len] = BN;
 	}else if (dataEqual(moves, move_len, "z"))
 	{
-		robotFlipZNormal();
+		solution[solution_len] = z;
 	}else if (dataEqual(moves, move_len, "z'"))
 	{
+		solution[solution_len] = zN;
+	}
+}
+
+void turnByMove(move move)
+{
+	switch (move)
+	{
+	case R:
+	{
+		robotTurnRightNormal();
+		break;
+	}
+	case RN:
+	{
+		robotTurnRightInvert();
+		break;
+	}
+	case L:
+	{
+		robotTurnLeftNormal();
+		break;
+	}
+	case LN:
+	{
+		robotTurnLeftInvert();
+		break;
+	}
+	case F:
+	{
+		robotTurnFrontNormal();
+		break;
+	}
+	case FN:
+	{
+		robotTurnFrontInvert();
+		break;
+	}
+	case B:
+	{
+		robotTurnBackNormal();
+		break;
+	}
+	case BN:
+	{
+		robotTurnBackInvert();
+		break;
+	}
+	case z:
+	{
+		robotFlipZNormal();
+		break;
+	}
+	case zN:
+	{
 		robotFlipZInvert();
+		break;
 	}
-}
-
-void loadColor()
-{
-	uint8_t need_load = 1; // 1: need load, 0: not need load
-	if (color_loaded == 0)
-	{
-		CDC_Transmit_FS(&need_load, 1);
-		HAL_Delay(USB_SPACE_DELAY);
-		// Read color from stored file
-		for (int i = 0; i < 6; ++i)
-		{
-			uint8_t ack = 1;
-			CDC_Transmit_FS(&ack, 1);
-			HAL_Delay(USB_SPACE_DELAY);
-			while (usb_received == 0 && usb_len != 3);
-			usb_received = 0;
-			setColorRange(i, usb_buf[0], usb_buf[1], usb_buf[2]);
-		}
-		color_loaded = 1;
-	}else
-	{
-		need_load = 0;
-		CDC_Transmit_FS(&need_load, 1);
-		HAL_Delay(USB_SPACE_DELAY);
+	default:
+		break;
 	}
-}
-
-void colorCalculate(uint8_t color, uint8_t avg_colors[])
-{
-	// Read color
-	uint32_t red_sum = 0;
-	uint32_t blue_sum = 0;
-	uint32_t green_sum = 0;
-	for (uint16_t j = 0; j < NUM_COLOR_SETUP; ++j)
-	{
-		uint8_t colors[3] = {color, color, color};
-		readRGB(colors, colors + 1, colors + 2);
-		red_sum += colors[0];
-		green_sum += colors[1];
-		blue_sum += colors[2];
-		HAL_Delay(readColor_DELAY);
-	}
-	setColorRange(color, 1.0 * red_sum / NUM_COLOR_SETUP,
-			1.0 * green_sum / NUM_COLOR_SETUP,
-			1.0 * blue_sum / NUM_COLOR_SETUP);
-	avg_colors[0] = red_sum / NUM_COLOR_SETUP;
-	avg_colors[1] = green_sum / NUM_COLOR_SETUP;
-	avg_colors[2] = blue_sum / NUM_COLOR_SETUP;
 }
 
 void waitFromPC()
@@ -149,14 +161,10 @@ void manualColorSetup()
 
 void manualRubikSolve()
 {
-	loadColor();
-
 	for (int i = 0; i < 48; ++i)
 	{
 		waitFromPC();
-		enum color c = readColor();
-		CDC_Transmit_FS((uint8_t*)&c, 1);
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		readColor();
 	}
 }
 
@@ -179,15 +187,14 @@ void autoColorSetup()
 
 void autoRubikSolve()
 {
-	loadColor();
-
 	// Set up initial state for the first face
 	robotReadColorInit();
 	for (int i = 0; i < 48; ++i)
 	{
-		enum color cell_color = readColor();
-		CDC_Transmit_FS((uint8_t*)&cell_color, 1);
+		readColor();
 		waitFromPC();
+
+		// After reading i-th cell color
 
 		// Read next cell
 		robotReadColor(i % 2);
@@ -214,8 +221,13 @@ void autoRubikSolve()
 		{
 			break;
 		}
-		turnByMove(usb_buf, usb_len);
+		addMoveToSolution(usb_buf, usb_len);
 		uint8_t ack = 1;
 		CDC_Transmit_FS(&ack, 1);
+	}
+	for (uint8_t i = 0; i < solution_len; ++i)
+	{
+		turnByMove(solution[i]);
+		HAL_Delay(ROBOT_AUTODURATION);
 	}
 }
